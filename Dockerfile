@@ -1,2 +1,2 @@
 FROM ubuntu:latest
-RUN mkdir trial
+RUN mkdir trialRepoForBashbrewTest
