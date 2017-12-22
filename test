@@ -1,0 +1,123 @@
+# Building Logstash
+
+The instructions provided below specify the steps to build Apache Logstash v5.6.1 on Linux on IBM Z for following distributions:
+
+* RHEL (6.9, 7.1, 7.2, 7.3, 7.4)
+* SLES (11 SP4, 12, 12 SP1, 12 SP2, 12 SP3)
+* Ubuntu (16.04, 17.04)
+
+_**General Notes:**_ 	 
+  * _When following the steps below please use a standard permission user unless otherwise specified._
+
+  * _A directory `/<source_root>/` will be referred to in these instructions, this is a temporary writable directory anywhere you'd like to place it._
+
+
+## Step 1: Building and installing Logstash  
+#### 1.1) Install dependencies
+
+
+ *	RHEL 6.9
+	```
+	sudo yum install -y java-1.8.0-ibm.s390x java-1.8.0-ibm-devel.s390x wget unzip tar gcc make
+	```
+
+ *	RHEL (7.1, 7.2, 7.3, 7.4)
+
+	With IBM SDK:
+
+	```
+	sudo yum install -y java-1.8.0-ibm-devel.s390x ant wget unzip make gcc unzip tar
+	```  
+
+	With OpenJDK:  
+	```
+	sudo yum install -y java-1.8.0-openjdk.s390x java-1.8.0-openjdk-devel.s390x ant wget unzip make gcc tar
+	```
+
+ *	SLES 11 SP4  
+	```
+	sudo zypper install -y wget tar gcc make unzip
+	```
+
+	* Download and install IBM Java 8 from [here](https://developer.ibm.com/javasdk/downloads/sdk8/)
+
+ *	SLES 12  
+	```
+	sudo zypper install -y ant wget unzip make gcc unzip tar
+	```
+
+	* Download and install IBM Java 8 from [here](https://developer.ibm.com/javasdk/downloads/sdk8/)
+
+ *	SLES (12 SP1, 12 SP2, 12 SP3)
+
+	With IBM SDK:
+
+	```
+	sudo zypper install -y --type pattern Basis-Devel
+	sudo zypper install -y java-1_8_0-ibm-devel ant wget unzip make gcc tar
+	```
+
+	With OpenJDK:  
+	```
+	sudo zypper install -y java-1_8_0-openjdk java-1_8_0-openjdk-devel ant wget unzip make gcc tar
+	```
+
+ *  Ubuntu (16.04, 17.04)
+
+	With IBM SDK:
+	```			
+	sudo apt-get install -y ant make wget unzip tar gcc 
+	```			
+	* Download and install IBM Java 8 from [here](https://developer.ibm.com/javasdk/downloads/sdk8/)
+
+	With OpenJDK:
+	```		
+	sudo apt-get install -y ant make wget unzip tar gcc openjdk-8-jdk
+	```
+	
+ * Install other dependency for RHEL 6.9 and SLES 11 SP4 i.e. **Ant**:
+    ```bash
+	cd /<source_root>/
+	wget http://archive.apache.org/dist/ant/binaries/apache-ant-1.9.4-bin.tar.gz
+	tar -zxvf apache-ant-1.9.4-bin.tar.gz
+	export ANT_HOME=`pwd`/apache-ant-1.9.4
+    ```
+    
+#### 1.2) Set Environment Variables
+      
+```bash  
+    export JAVA_HOME=<path to java>
+    export PATH=$JAVA_HOME/bin:$PATH
+    export PATH=$ANT_HOME/bin:$PATH  # for RHEL 6.9 and SLES 11 SP4
+``` 
+#### 1.3) Download source code of Logstash
+
+```bash
+    cd /<source_root>/
+    wget https://artifacts.elastic.co/downloads/logstash/logstash-5.6.1.zip
+    unzip -u logstash-5.6.1.zip
+```
+
+ Jruby runs on JVM and needs a native library (libjffi-1.2.so: java foreign language interface). Get `jffi` source code and build with `ant`
+```bash
+    cd /<source_root>/
+    wget https://github.com/jnr/jffi/archive/master.zip -O master.zip
+    unzip master.zip 
+    cd jffi-master
+    ant
+```
+#### 1.4) Copy libjffi-1.2.so to Logstash folder
+```bash
+    cd /<source_root>/
+    mkdir logstash-5.6.1/vendor/jruby/lib/jni/s390x-Linux
+    cp jffi-master/build/jni/libjffi-1.2.so logstash-5.6.1/vendor/jruby/lib/jni/s390x-Linux/libjffi-1.2.so
+```
+## Step 2: Run Logstash
+```bash
+cd /<source_root>/logstash-5.6.1
+bin/logstash -V
+```
+
+## References:
+
+[logstash](https://www.elastic.co/products/logstash)
